@@ -1,3 +1,4 @@
+@import etsf20.basesystem.domain.models.UserRole
 @import java.time.ZoneId
 @import java.time.format.DateTimeFormatter
 @import java.time.format.FormatStyle
@@ -14,10 +15,19 @@ content = @`
                                                    .withLocale(Locale.getDefault())
                                                    .withZone(ZoneId.systemDefault());
     }
-    @for(var project : page.getProjects())
-        <a class="nav-link pb-3" href="/projects/${project.getUuid().toString()}/">
-            <h3>${project.getProjectName()}</h3>
-            <p class="text-muted"><em>${project.getDescription()}</em></p>
-        </a>
-    @endfor
+    @if(page.session().isLoggedIn() && page.session().userRole() == UserRole.ADMIN)
+        @for(var project : page.getProjects())
+            <a class="nav-link pb-3" href="/projects/${project.getUuid().toString()}/">
+                <h3>${project.getProjectName()}</h3>
+                <p class="text-muted"><em>${project.getDescription()}</em></p>
+            </a>
+        @endfor
+    @else
+        @for(var project : page.getProjectsForCurrentUser())
+            <a class="nav-link pb-3" href="/projects/${project.getUuid().toString()}/">
+                <h3>${project.getProjectName()}</h3>
+                <p class="text-muted"><em>${project.getDescription()}</em></p>
+            </a>
+        @endfor
+    @endif
 `)

@@ -1,5 +1,6 @@
 package etsf20.basesystem.domain.repositories;
 
+import etsf20.basesystem.domain.models.Project;
 import etsf20.basesystem.persistance.Database;
 import etsf20.basesystem.persistance.DatabaseException;
 
@@ -25,8 +26,21 @@ public class UserProjectRepository extends BaseRepository {
      * @return true if insertion was successful
      */
     public boolean addUserToProject(String username, UUID projectUuid) {
-        String sql = "INSERT INTO user_projects (username, project_uuid) VALUES (?, ?)";
-        try (var stmt = db.prepare(sql)) {
+        //If user is already in project, return false
+        String sql1 = "SELECT * FROM user_projects WHERE username = ? AND project_uuid = ?";
+        try (var stmt = db.prepare(sql1)) {
+            stmt.setString(1, username);
+            stmt.setString(2, projectUuid.toString());
+            if (stmt.executeQuery().next()) {
+                return false;
+            }
+        } catch (SQLException ex) {
+            throw new DatabaseException("Failed to check if user is already in project", ex);
+        }
+
+
+        String sql2 = "INSERT INTO user_projects (username, project_uuid) VALUES (?, ?)";
+        try (var stmt = db.prepare(sql2)) {
             stmt.setString(1, username);
             stmt.setString(2, projectUuid.toString());
             return stmt.executeUpdate() > 0;
@@ -38,7 +52,7 @@ public class UserProjectRepository extends BaseRepository {
     /**
      * Remove a user from a project.
      *
-     * @param username     The ID of the user
+     * @param username    The ID of the user
      * @param projectUuid The UUID of the project
      * @return true if deletion was successful
      */
@@ -59,28 +73,31 @@ public class UserProjectRepository extends BaseRepository {
      * @param projectUuid The UUID of the project
      * @return A list of user IDs and roles
      */
-    public List<Map<String, Object>> getUsersForProject(UUID projectUuid) {
+    public List<String> getUsersForProject(UUID projectUuid) {
         String sql = "SELECT username FROM user_projects WHERE project_uuid = ?";
         try {
-            return db.list(sql, rs -> {
-                Map<String, Object> result = new HashMap<>();
-                result.put("username", rs.getString("username"));
-                return result;
-            }, projectUuid.toString());
+            return db.list(sql, rs -> rs.getString("username"), projectUuid.toString());
 
         } catch (DatabaseException ex) {
             throw new DatabaseException("Failed to fetch users for project", ex);
         }
     }
 
-    /**
-     * Maps a result set row to a user-project mapping.
-     */
-    private Map<String, Object> mapUserProject(ResultSet rs) throws SQLException {
-        Map<String, Object> result = new HashMap<>();
-        result.put("username", rs.getString("username"));
-        result.put("project_uuid", UUID.fromString(rs.getString("project_uuid")));
-        return result;
+    public List<Project> getProjectsForUser(String username) {
+        String sql = "SELECT p.project_uuid, p.projectName, p.description FROM user_projects up JOIN projects p ON up.project_uuid = p.project_uuid WHERE up.username = ?";
+        try {
+            return db.list(sql, this::mapProject, username);
+        } catch (DatabaseException ex) {
+            throw new DatabaseException("Failed to fetch projects for user", ex);
+        }
+    }
+
+    private Project mapProject(ResultSet rs) throws SQLException {
+        return new Project(
+                UUID.fromString(rs.getString("project_uuid")),
+                rs.getString("projectName"),
+                rs.getString("description")
+        );
     }
 }
 

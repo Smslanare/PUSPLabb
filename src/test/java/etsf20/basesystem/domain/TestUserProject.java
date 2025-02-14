@@ -88,8 +88,8 @@ public class TestUserProject {
         UUID projectId = createProject();
         repos.userProjects().addUserToProject(userProject.getUsername(), projectId);
 
-        List<Map<String, Object>> users = repos.userProjects().getUsersForProject(projectId);
+        List<String> users = repos.userProjects().getUsersForProject(projectId);
         assertFalse(users.isEmpty(), "no users found for project");
-        assertEquals(userProject.getUsername(), users.get(0).get("username"), "username does not match");
+        assertEquals(userProject.getUsername(), users.get(0), "username does not match");
     }
 }

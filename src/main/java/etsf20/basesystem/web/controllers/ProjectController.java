@@ -29,8 +29,9 @@ public class ProjectController {
     public static void list(Context ctx) {
         Repositories repos = Repositories.from(ctx);
         List<Project> projects = repos.projects().list();
+        List<Project> myProjects = repos.userProjects().getProjectsForUser(Session.from(ctx).username());
         users = repos.users().list();
-        ListProjectPage listProjectsPage = new ListProjectPage(ctx, projects);
+        ListProjectPage listProjectsPage = new ListProjectPage(ctx, projects, myProjects);
         listProjectsPage.render();
     }
 
@@ -57,7 +58,7 @@ public class ProjectController {
             throw new NotFoundResponse();
         }
 
-        var viewPage = new ViewProjectPage(ctx, project.get());
+        var viewPage = new ViewProjectPage(ctx, project.get(), repos.userProjects().getUsersForProject(project.get().getUuid()));
         viewPage.render();
     }
 
@@ -84,10 +85,14 @@ public class ProjectController {
                 if (editPage.isFormValid()) {
                     entry.setProjectName(editPage.getProjectName());
                     entry.setDescription(editPage.getDescription());
+
+                    if(editPage.getSelectedUser() != null) repos.userProjects().addUserToProject(editPage.getSelectedUser(), projectUuid);
+
                     repos.projects().update(entry);
                     repos.commit();
 
                     Controllers.returnPathMessageRedirect(ctx,
+                            //Hade kunnat ändra så att den visar något annat ifall man försöker lägga till en befintlig användare
                             "Project successfully updated",
                             AlertType.SUCCESS,
                             "/projects/");
@@ -134,6 +139,20 @@ public class ProjectController {
         }
     }
 
+    public static void removeUserFromProject(Context ctx) throws ValidationException {
+        Repositories repos = Repositories.from(ctx);
+        UUID projectUuid = Controllers.readUUID(ctx, "project-uuid");
+        String username = ctx.pathParam("username");
+
+        if (repos.userProjects().removeUserFromProject(username, projectUuid)) {
+            repos.commit();
+            Controllers.returnPathMessageRedirect(ctx, "User successfully removed from project", AlertType.SUCCESS);
+            return;
+        }
+
+        throw new NotFoundResponse();
+    }
+
     public static void configure() {
         get("/", ProjectController::list, UserRole.loggedIn());
         get("/create", ProjectController::create, UserRole.loggedIn());
@@ -146,5 +165,8 @@ public class ProjectController {
 
         get("/{project-uuid}/delete", ProjectController::delete, UserRole.loggedIn());
         post("/{project-uuid}/delete", ProjectController::delete, UserRole.loggedIn());
+
+        get("/{project-uuid}/remove/{username}", ProjectController::removeUserFromProject, UserRole.loggedIn());
+        post("/{project-uuid}/remove/{username}", ProjectController::removeUserFromProject, UserRole.loggedIn());
     }
 }

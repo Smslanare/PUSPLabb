@@ -7,6 +7,7 @@ import etsf20.basesystem.web.pages.forms.FormField;
 import etsf20.basesystem.web.pages.forms.StringFormField;
 import etsf20.basesystem.web.pages.forms.Validation;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -66,9 +67,10 @@ public class CreateEditProjectPage extends FormPage {
         return this.selectedUser;
     }
 
-    //Method for getting all users in database
+
     public List<User> getUsers() {
-        return users;
+        return users != null ? users : new ArrayList<User>() {
+        };
     }
 
     public boolean isSelectedUser(String username) {

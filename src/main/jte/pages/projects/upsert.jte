@@ -33,7 +33,7 @@ content = @`
             <select class="form-select ${page.getFieldBootstrapCssClass("user")}" id="user" name="user">
                 <option value="">Select user</option>
                 @for(etsf20.basesystem.domain.models.User user : page.getUsers())
-                    <option value="${user.getDisplayName()}"> ${user.getDisplayName()} </option>
+                    <option value="${user.getUsername()}">${user.getUsername()} | ${user.getUsername()}</option>
                 @endfor
             </select>
             @if(page.fieldHasError("user"))
