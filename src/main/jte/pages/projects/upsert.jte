@@ -28,6 +28,21 @@ content = @`
                 </div>
             @endif
         </div>
+        <div class="mb-3">
+            <label for="user" class="form-label">User</label>
+            <select class="form-select ${page.getFieldBootstrapCssClass("user")}" id="user" name="user">
+                <option value="">Select user</option>
+                @for(etsf20.basesystem.domain.models.User user : page.getUsers())
+                    <option value="${user.getDisplayName()}"> ${user.getDisplayName()} </option>
+                @endfor
+            </select>
+            @if(page.fieldHasError("user"))
+                <div class="invalid-feedback">
+                    ${page.getErrorFeedback("user")}
+                </div>
+            @endif
+        </div>
+
         <button type="submit" class="btn btn-primary">Save</button>
         <a href="${page.returnPathOrDefault("/projects/")}" class="btn btn-secondary">Cancel</a>
     </form>

@@ -1,5 +1,6 @@
 package etsf20.basesystem.web.pages.projects;
 
+import etsf20.basesystem.domain.models.User;
 import io.javalin.http.Context;
 import etsf20.basesystem.web.pages.forms.FormPage;
 import etsf20.basesystem.web.pages.forms.FormField;
@@ -14,12 +15,15 @@ public class CreateEditProjectPage extends FormPage {
     private String projectName;
     private String description;
     private final String uuid;
+    private List<User> users;
+    private String selectedUser = null;
 
-    public CreateEditProjectPage(Context ctx, String projectName, String description, String uuid) {
+    public CreateEditProjectPage(Context ctx, String projectName, String description, String uuid, List<User> users) {
         super(ctx);
         this.projectName = projectName;
         this.description = description;
         this.uuid = uuid;
+        this.users = users;
     }
 
     public String getUuid() {
@@ -35,11 +39,17 @@ public class CreateEditProjectPage extends FormPage {
         FormField<String> descriptionField = new StringFormField("description")
                 .check(v -> v.length() <= 64000, "too long");
 
+        FormField<String> userField = new StringFormField("user");
+
         readField(projectNameField);
         readField(descriptionField);
+        readField(userField);
 
         this.projectName = projectNameField.get();
         this.description = descriptionField.get();
+        this.selectedUser = userField.get();
+
+        System.out.println("Selected user: " + selectedUser);
 
         return Validation.collectErrors(projectNameField, descriptionField);
     }
@@ -50,6 +60,19 @@ public class CreateEditProjectPage extends FormPage {
 
     public String getDescription() {
         return this.description;
+    }
+
+    public String getSelectedUser() {
+        return this.selectedUser;
+    }
+
+    //Method for getting all users in database
+    public List<User> getUsers() {
+        return users;
+    }
+
+    public boolean isSelectedUser(String username) {
+        return false;
     }
 
     public void render() {

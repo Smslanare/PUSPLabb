@@ -1,5 +1,6 @@
 package etsf20.basesystem.web.controllers;
 
+import etsf20.basesystem.domain.models.User;
 import io.javalin.http.Context;
 import io.javalin.http.HandlerType;
 import io.javalin.http.NotFoundResponse;
@@ -23,15 +24,18 @@ import static io.javalin.apibuilder.ApiBuilder.*;
 
 public class ProjectController {
 
+    static List<User> users;
+
     public static void list(Context ctx) {
         Repositories repos = Repositories.from(ctx);
         List<Project> projects = repos.projects().list();
+        users = repos.users().list();
         ListProjectPage listProjectsPage = new ListProjectPage(ctx, projects);
         listProjectsPage.render();
     }
 
     public static void create(Context ctx) throws ValidationException {
-        CreateEditProjectPage createPage = new CreateEditProjectPage(ctx, "", "", "");
+        CreateEditProjectPage createPage = new CreateEditProjectPage(ctx, "", "", "", users);
         if (ctx.method() == HandlerType.POST) {
             createPage.readForm();
             if (createPage.isFormValid()) {
@@ -70,7 +74,8 @@ public class ProjectController {
                     ctx,
                     entry.getProjectName(),
                     entry.getDescription(),
-                    entry.getUuid().toString()
+                    entry.getUuid().toString(),
+                    repos.users().list()
             );
 
             editPage.readForm();

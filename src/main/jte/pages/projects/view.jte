@@ -10,7 +10,7 @@ page = page,
 content = @`
     @template.pages.projects.nav(page = page, extraLinks = @`
         @template.components.navitem(title="View", href="/projects/" + page.project().getUuid().toString() + "/", exact = true, page=page)
-        @template.components.navitem(title="Edit", href="/projects/" + page.project().getUuid().toString() + "/edit?returnPath=" + page.path(), exact = true, page=page)
+        @template.components.navitem(title="Manage", href="/projects/" + page.project().getUuid().toString() + "/edit?returnPath=" + page.path(), exact = true, page=page)
     `)
     !{
     DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL)
