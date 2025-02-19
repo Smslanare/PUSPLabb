@@ -16,7 +16,7 @@ public class Config {
     /**
      * Will expose the internal H2 database as a server allowing multiple clients, even outside the base system.
      */
-    private static final boolean DEFAULT_MIXED_MODE = true;
+    private static final boolean DEFAULT_MIXED_MODE = false;
     private static final int DEFAULT_PORT = 8080;
     private static final String DATABASE_DRIVER = "org.h2.Driver";
     private static final String DATABASE_JDBC_URL = "jdbc:h2:./data";

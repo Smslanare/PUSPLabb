@@ -24,8 +24,8 @@ import static io.javalin.apibuilder.ApiBuilder.*;
 
 public class ProjectController {
 
-    static List<User> users;
-
+	static List<User> users;
+	
     public static void list(Context ctx) {
         Repositories repos = Repositories.from(ctx);
         List<Project> projects = repos.projects().list();
@@ -41,9 +41,17 @@ public class ProjectController {
             createPage.readForm();
             if (createPage.isFormValid()) {
                 Repositories repos = Repositories.from(ctx);
-                repos.projects().create(new Project(UUID.randomUUID(), createPage.getProjectName(), createPage.getDescription()));
-                repos.commit();
+                UUID randomUUId = UUID.randomUUID();
 
+                // Create a new project with the new UUID
+                Project newProject = new Project(randomUUId, createPage.getProjectName(), createPage.getDescription());
+                repos.projects().create(newProject);
+
+                // Commit to ensure the project is saved in the database
+                repos.commit();  // Make sure this commit happens here before adding users
+
+            
+                // Redirect with success message
                 Controllers.returnPathMessageRedirect(ctx, "Project successfully created", AlertType.SUCCESS);
                 return;
             }
@@ -58,6 +66,7 @@ public class ProjectController {
             throw new NotFoundResponse();
         }
 
+        //var viewPage = new ViewProjectPage(ctx, project.get(), repos.userProjects().getUsersForProject(project.get().getUuid()), repos.userProjects().getUsernameForProject(project.get().getUuid()));
         var viewPage = new ViewProjectPage(ctx, project.get(), repos.userProjects().getUsersForProject(project.get().getUuid()));
         viewPage.render();
     }
@@ -85,14 +94,13 @@ public class ProjectController {
                 if (editPage.isFormValid()) {
                     entry.setProjectName(editPage.getProjectName());
                     entry.setDescription(editPage.getDescription());
-
-                    if(editPage.getSelectedUser() != null) repos.userProjects().addUserToProject(editPage.getSelectedUser(), projectUuid);
-
+                    if(editPage.getSelectedUser() != null) {
+                    	repos.userProjects().addUserToProject(editPage.getSelectedUser(), projectUuid);
+                    }
                     repos.projects().update(entry);
                     repos.commit();
 
                     Controllers.returnPathMessageRedirect(ctx,
-                            //Hade kunnat ändra så att den visar något annat ifall man försöker lägga till en befintlig användare
                             "Project successfully updated",
                             AlertType.SUCCESS,
                             "/projects/");
@@ -152,20 +160,20 @@ public class ProjectController {
 
         throw new NotFoundResponse();
     }
-
+    
     public static void configure() {
         get("/", ProjectController::list, UserRole.loggedIn());
         get("/create", ProjectController::create, UserRole.loggedIn());
         post("/create", ProjectController::create, UserRole.loggedIn());
 
-        get("/{project-uuid}/", ProjectController::view, UserRole.loggedIn());
+        get("/{project-uuid}/", ProjectController::	view, UserRole.loggedIn());
 
         get("/{project-uuid}/edit", ProjectController::edit, UserRole.loggedIn());
         post("/{project-uuid}/edit", ProjectController::edit, UserRole.loggedIn());
 
         get("/{project-uuid}/delete", ProjectController::delete, UserRole.loggedIn());
         post("/{project-uuid}/delete", ProjectController::delete, UserRole.loggedIn());
-
+        
         get("/{project-uuid}/remove/{username}", ProjectController::removeUserFromProject, UserRole.loggedIn());
         post("/{project-uuid}/remove/{username}", ProjectController::removeUserFromProject, UserRole.loggedIn());
     }

@@ -30,7 +30,3 @@ CREATE TABLE notes(
     primary key (note_uuid),
     foreign key (username) references users(username) on delete cascade on update cascade
 );
-
-
-
-

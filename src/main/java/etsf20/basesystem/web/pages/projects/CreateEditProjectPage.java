@@ -8,11 +8,12 @@ import etsf20.basesystem.web.pages.forms.StringFormField;
 import etsf20.basesystem.web.pages.forms.Validation;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 public class CreateEditProjectPage extends FormPage {
-
     private String projectName;
     private String description;
     private final String uuid;
@@ -41,7 +42,7 @@ public class CreateEditProjectPage extends FormPage {
                 .check(v -> v.length() <= 64000, "too long");
 
         FormField<String> userField = new StringFormField("user");
-
+        
         readField(projectNameField);
         readField(descriptionField);
         readField(userField);
@@ -51,7 +52,7 @@ public class CreateEditProjectPage extends FormPage {
         this.selectedUser = userField.get();
 
         System.out.println("Selected user: " + selectedUser);
-
+        
         return Validation.collectErrors(projectNameField, descriptionField);
     }
 
@@ -64,19 +65,18 @@ public class CreateEditProjectPage extends FormPage {
     }
 
     public String getSelectedUser() {
-        return this.selectedUser;
+    	return this.selectedUser;
     }
-
-
+    
     public List<User> getUsers() {
-        return users != null ? users : new ArrayList<User>() {
-        };
+    	users.sort(Comparator.comparing(user -> user.getDisplayName().toLowerCase()));
+    	return users;
     }
-
+    
     public boolean isSelectedUser(String username) {
-        return false;
+    	return false;
     }
-
+    
     public void render() {
         this.render("pages/projects/upsert.jte");
     }

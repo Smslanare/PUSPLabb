@@ -9,6 +9,4 @@
         @template.components.navitem(title="Create", href="/projects/create", query = "returnPath=/projects/", page=page)
         ${extraLinks}
     @endif
-
-
 </ul>

@@ -22,9 +22,9 @@ public class ListProjectPage extends Page {
     }
 
     public List<Project> getProjectsForCurrentUser() {
-        return myProjects;
+    	return myProjects;
     }
-
+    
     @Override
     public void render() {
         this.render("pages/projects/list.jte");

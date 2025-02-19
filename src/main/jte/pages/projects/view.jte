@@ -1,3 +1,5 @@
+@import etsf20.basesystem.domain.models.UserRole
+@import etsf20.basesystem.domain.models.User
 @import java.time.ZoneId
 @import java.time.format.DateTimeFormatter
 @import java.time.format.FormatStyle
@@ -22,16 +24,15 @@ content = @`
     <p class="text-muted"><cite title="Source Title">${page.project().getProjectName()}</cite></p>
     <p>${page.project().getDescription()}</p>
     
-    <h2>Users</h2>
+	<h2>Users</h2>
+	@if(page.session().isLoggedIn() && page.session().userRole() == UserRole.ADMIN)
     <ul class="">
-        @for (String username : page.getUserProjects())
-            <li>${username} <a class="remove-button" href="/projects/${page.project().getUuid().toString()}/remove/${username}?returnPath=${page.path()}">Remove</a></li>
+        @for (User user : page.getUsers())
+            <li>${user.getDisplayName()} <a class="remove-button" href="/projects/${page.project().getUuid().toString()}/remove/${user.getUsername()}?returnPath=${page.path()}">Remove</a></li>
         @endfor
     </ul>
     <a href="/projects/${page.project().getUuid().toString()}/delete?returnPath=/projects/">Delete</a>
-
-
-    <style>
+     <style>
         .remove-button {
             display: none;
         }
@@ -39,4 +40,11 @@ content = @`
             display: inline;
         }
     </style>
+    @else
+    <ul class="">
+        @for (User user : page.getUsers())
+            <li>${user.getDisplayName()}</li>
+        @endfor
+    @endif
+    </ul>
 `)

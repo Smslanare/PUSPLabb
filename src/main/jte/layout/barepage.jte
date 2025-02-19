@@ -1,4 +1,4 @@
-    @import gg.jte.Content
+@import gg.jte.Content
 @import etsf20.basesystem.web.pages.Page
 @param String title = ""
 @param Page page

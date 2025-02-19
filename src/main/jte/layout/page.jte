@@ -35,7 +35,7 @@
         @endif
       </div>
     </header>
-
+    
     <main>
       @template.components.alert(alert=page.getAlert())
       ${content}
